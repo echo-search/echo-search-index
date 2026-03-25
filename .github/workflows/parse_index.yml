@@ -1,0 +1,30 @@
+name: Parse & Index EchoSearch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  parse_index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install beautifulsoup4 lxml elasticsearch
+
+      - name: Download crawl JSON
+        uses: actions/download-artifact@v4
+        with:
+          name: crawl-json
+          path: .
+
+      - name: Parse HTML and index to Elasticsearch
+        run: |
+          python parse_and_index.py
