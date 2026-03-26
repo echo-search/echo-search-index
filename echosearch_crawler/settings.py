@@ -24,7 +24,7 @@ AUTOTHROTTLE_MAX_DELAY = 10
 CLOSESPIDER_PAGECOUNT = 1000000
 
 # Hard stop after ~5.5 hours (backup safety)
-CLOSESPIDER_TIMEOUT = 21600   # seconds (5.5 hours)
+CLOSESPIDER_TIMEOUT = 20700   # seconds (5.5 hours)
 
 # --- FEED OUTPUT ---
 FEED_FORMAT = "json"
