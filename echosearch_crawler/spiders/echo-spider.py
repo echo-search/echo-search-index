@@ -6,8 +6,13 @@ class EchoSpider(scrapy.Spider):
 
     # Safe, crawlable seeds — change later as you scale
     start_urls = [
-        "https://wikipedia.org",
-        "https://www.google.com"
+        "https://www.wikipedia.org",
+        "https://www.google.com",
+        "https://www.bbc.co.uk",
+        "https://echo-search.github.io",
+        "https://jav-ai.netlify.app",
+        "https://the-girl-gang.netlify.app",
+        "https://github.com"
     ]
 
     def parse(self, response):
