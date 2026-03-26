@@ -1,0 +1,7 @@
+{
+  "name": "EchoSearch Dev",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "postCreateCommand": "echo Ready!"
+}
