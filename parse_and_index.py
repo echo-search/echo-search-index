@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch, helpers
 
 # Elasticsearch connection
-es = Elasticsearch("https://YOUR_ELASTIC_URL", basic_auth=("USER", "PASS"))
+es = Elasticsearch("https://407f6567cff94b42a621cb81c626064c.europe-west2.gcp.elastic-cloud.com:443", basic_auth=("USER", "PASS"))
 
 # Load the crawl JSON
 with open("crawl_output.json", "r", encoding="utf-8") as f:
