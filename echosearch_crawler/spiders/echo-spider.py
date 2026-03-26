@@ -6,14 +6,40 @@ class EchoSpider(scrapy.Spider):
 
     # Safe, crawlable seeds — change later as you scale
     start_urls = [
-        "https://www.wikipedia.org",
-        "https://www.google.com",
-        "https://www.bbc.co.uk",
-        "https://echo-search.github.io",
-        "https://jav-ai.netlify.app",
-        "https://the-girl-gang.netlify.app",
-        "https://github.com"
-    ]
+    "https://en.wikipedia.org",
+    "https://w3.org",
+    "https://archive.org",
+    "https://mozilla.org",
+    "https://python.org",
+    "https://gnu.org",
+    "https://mit.edu",
+    "https://harvard.edu",
+    "https://stanford.edu",
+    "https://berkeley.edu",
+    "https://cornell.edu",
+    "https://cam.ac.uk",
+    "https://ox.ac.uk",
+    "https://europa.eu",
+    "https://un.org",
+    "https://who.int",
+    "https://worldbank.org",
+    "https://weforum.org",
+    "https://nasa.gov",
+    "https://nih.gov",
+    "https://noaa.gov",
+    "https://github.io",
+    "https://github.com",  # only public docs, many pages blocked
+    "https://readthedocs.io",
+    "https://deeplearning.ai",
+    "https://tensorflow.org",
+    "https://pytorch.org",
+    "https://docs.python.org",
+    "https://docs.github.com",
+    "https://developer.mozilla.org",
+    "https://boost.org",
+    "https://kaggle.com",
+    "https://echo-search.github.io"
+]
 
     def parse(self, response):
         item = EchosearchCrawlerItem()
