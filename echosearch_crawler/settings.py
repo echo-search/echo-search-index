@@ -30,7 +30,7 @@ CLOSESPIDER_TIMEOUT = 19800   # seconds (5.5 hours)
 FEED_FORMAT = "json"
 FEED_URI = "crawl_output.json"
 
-# --- PIPELINES ---
 ITEM_PIPELINES = {
+    'echosearch_crawler.pipelines.DedupPipeline': 100,
     'echosearch_crawler.pipelines.EchosearchCrawlerPipeline': 300,
 }
