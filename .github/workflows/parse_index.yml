@@ -22,7 +22,7 @@ jobs:
       - name: Download crawl JSON
         uses: actions/download-artifact@v4
         with:
-          name: crawl-json
+          name: crawl_output
           path: .
 
       - name: Parse HTML and index to Elasticsearch
