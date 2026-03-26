@@ -7,6 +7,7 @@ class EchoSpider(scrapy.Spider):
     # Replace with safe seed URLs
     start_urls = [
         "https://wikipedia.org",
+        "https://www.google.com",
         "https://echo-search.github.io"
     ]
 
