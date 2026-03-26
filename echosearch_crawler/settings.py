@@ -21,10 +21,10 @@ AUTOTHROTTLE_MAX_DELAY = 10
 
 # --- 6-HOUR LIFESAVER SETTINGS ---
 # Hard stop after X pages (prevents GitHub Actions 6hr failure)
-CLOSESPIDER_PAGECOUNT = 5000
+CLOSESPIDER_PAGECOUNT = 1000000
 
 # Hard stop after ~5.5 hours (backup safety)
-CLOSESPIDER_TIMEOUT = 19800   # seconds (5.5 hours)
+CLOSESPIDER_TIMEOUT = 21600   # seconds (5.5 hours)
 
 # --- FEED OUTPUT ---
 FEED_FORMAT = "json"
