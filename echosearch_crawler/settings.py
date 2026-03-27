@@ -31,6 +31,6 @@ FEED_FORMAT = "json"
 FEED_URI = "crawl_output.json"
 
 ITEM_PIPELINES = {
-    'echosearch_crawler.pipelines.DedupPipeline': 100,
-    'echosearch_crawler.pipelines.EchosearchCrawlerPipeline': 300,
+    'echosearch_crawler.pipelines.DedupPipeline': 200,
+    'echosearch_crawler.pipelines.ElasticsearchPipeline': 300,
 }
