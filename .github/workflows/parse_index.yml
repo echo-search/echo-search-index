@@ -6,25 +6,74 @@ on:
 jobs:
   parse_index:
     runs-on: ubuntu-latest
+
     steps:
+      # 🧾 Checkout your repository
       - uses: actions/checkout@v3
 
+      # 🐍 Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
+      # 📦 Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install beautifulsoup4 lxml elasticsearch
+          pip install beautifulsoup4 lxml elasticsearch requests
 
-      - name: Download crawl JSON
-        uses: actions/download-artifact@v4
-        with:
-          name: crawl_output
-          path: .
+      # 🔐 GitHub Token (needed for API requests)
+      - name: Save GitHub Token
+        run: echo "${{ secrets.GITHUB_TOKEN }}" > token.txt
 
-      - name: Parse HTML and index to Elasticsearch
+      # 📥 Fetch the latest crawl artifact using GitHub API
+      - name: Download latest crawl_output artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python parse_and_index.py
+          REPO="${{ github.repository }}"
+          WORKFLOW="crawl"   # name/id of your crawl workflow
+          ARTIFACT="crawl_output"
+
+          # Get the most recent successful run
+          API_URL="https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW.yml/runs?status=success&per_page=5"
+
+          echo "Querying GitHub for latest runs…"
+          RUN_ID=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" "$API_URL" \
+            | jq -r '.workflow_runs[0].id')
+
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
+            echo "No successful runs found for $WORKFLOW!"
+            exit 1
+          fi
+
+          echo "Latest successful run: $RUN_ID"
+
+          # Get artifact download URL
+          ART_URL=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/runs/$RUN_ID/artifacts" \
+            | jq -r ".artifacts[] | select(.name == \"$ARTIFACT\") | .archive_download_url")
+
+          if [ -z "$ART_URL" ] || [ "$ART_URL" == "null" ]; then
+            echo "Artifact '$ARTIFACT' not found in run $RUN_ID!"
+            exit 1
+          fi
+
+          echo "Found artifact URL: $ART_URL"
+          curl -L -H "Authorization: Bearer $GITHUB_TOKEN" "$ART_URL" -o artifact.zip
+          unzip artifact.zip -d crawl_artifact
+
+      # ✅ Verify file exists
+      - name: Verify crawl_output.json exists
+        run: |
+          if [ ! -f "./crawl_artifact/crawl_output.json" ]; then
+            echo "❌ crawl_output.json not found!"
+            exit 1
+          fi
+          echo "✅ crawl_output.json found"
+
+      # 🧠 Run parser & indexer
+      - name: Parse & index to Elasticsearch
+        run: |
+          python parse_and_index.py ./crawl_artifact/crawl_output.json
