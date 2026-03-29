@@ -1,17 +1,17 @@
-version: "3.8"
-
+version: '3.8'
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
-    container_name: es8
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: echo-es
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false  # makes curl simpler
     ports:
       - "9200:9200"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - echo-net
 
-volumes:
-  esdata:
+networks:
+  echo-net:
+    driver: bridge
