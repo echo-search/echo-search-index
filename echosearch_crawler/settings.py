@@ -36,4 +36,11 @@ ITEM_PIPELINES = {
 # -----------------------------
 # DISABLE FEED OUTPUT (IMPORTANT)
 # -----------------------------
-FEEDS = {}
+FEEDS = {
+    'crawl_output.json': {
+        'format': 'json',
+        'encoding': 'utf8',
+        'indent': 0,
+        'overwrite': True,
+    }
+}
