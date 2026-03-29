@@ -28,7 +28,7 @@ jobs:
       # Runs Scrapy crawler ONLY
       - name: Run Scrapy crawler
         run: |
-          scrapy crawl echo_spider
+          scrapy crawl echo_spider -O crawl_output.json
 
       - name: Commit crawl output
         run: |
