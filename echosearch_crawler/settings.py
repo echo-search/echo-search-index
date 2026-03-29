@@ -25,7 +25,7 @@ AUTOTHROTTLE_MAX_DELAY = 10
 # PREVENT 6-HR GITHUB CANCELLATION
 # ------------------------------------------------
 CLOSESPIDER_PAGECOUNT = 100
-CLOSESPIDER_TIMEOUT = 20701
+CLOSESPIDER_TIMEOUT = 6300
 
 # ------------------------------------------------
 # PIPELINES (DIFFERENT for Codespaces vs Actions)
