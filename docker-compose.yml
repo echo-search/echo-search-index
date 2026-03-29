@@ -1,16 +1,24 @@
 version: '3.8'
+
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: echo-es
     environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=false  # makes curl simpler
+      - discovery.type=single-node             # run in single-node mode
+      - xpack.security.enabled=false           # disable authentication
+      - xpack.security.http.ssl.enabled=false  # disable HTTPS/SSL
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m        # memory limits
     ports:
-      - "9200:9200"
+      - "9200:9200"                            # expose ES port
     networks:
       - echo-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 networks:
   echo-net:
