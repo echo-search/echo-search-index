@@ -30,7 +30,6 @@ CLOSESPIDER_TIMEOUT = 20701         # ~5.5 hours
 # -----------------------------
 ITEM_PIPELINES = {
     'echosearch_crawler.pipelines.DedupPipeline': 200,
-    'echosearch_crawler.pipelines.ElasticsearchPipeline': 300,
 }
 
 # -----------------------------
