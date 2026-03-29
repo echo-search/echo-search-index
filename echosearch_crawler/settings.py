@@ -30,7 +30,7 @@ CLOSESPIDER_TIMEOUT = 20701
 # ------------------------------------------------
 # PIPELINES (DIFFERENT for Codespaces vs Actions)
 # ------------------------------------------------
-if os.getenv("GITHUB_ACTIONS"):
+if os.getenv("CI"):
     # GitHub Actions: NO Elasticsearch, only dedup
     ITEM_PIPELINES = {
         'echosearch_crawler.pipelines.DedupPipeline': 200,
