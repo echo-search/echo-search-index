@@ -1,63 +1,41 @@
-name: EchoSearch Crawl
-
-permissions:
-  contents: write
+name: Auto Generate index.html
 
 on:
   workflow_dispatch:
 
 jobs:
-  crawl:
+  generate-html:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # 1️⃣ Checkout the repo with token
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0   # IMPORTANT: fetch full history so pull works
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
+      # 2️⃣ Create index.html
+      - name: Create index.html
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          echo "<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Auto Generated Page</title>
+</head>
+<body>
+  <h1>Hello from GitHub Actions!</h1>
+</body>
+</html>" > index.html
 
-      - name: Clear Python cache
+      # 3️⃣ Commit and push using the token
+      - name: Commit and Push index.html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-         find . -type d -name "__pycache__" -exec rm -rf {} +
-
-      - name: Run Scrapy crawler
-        run: |
-          scrapy crawl echo_spider -O crawl_output.json
-
-      - name: Check crawl_output exists
-        id: check_output
-        run: |
-          if [ -f crawl_output.json ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload crawl_output artifact
-        if: steps.check_output.outputs.exists == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: crawl_output
-          path: crawl_output.json
-
-      - name: Pull latest before committing
-        run: |
-          git pull --rebase origin main || true
-
-      - name: Commit crawl output
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add crawl_output.json || echo "No file to add"
-          git commit -m "Update crawl output" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html || echo "No file to add"
+          git commit -m "Auto-generate index.html via GitHub Actions" || echo "No changes to commit"
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:main
