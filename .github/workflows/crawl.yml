@@ -30,6 +30,22 @@ jobs:
         run: |
           scrapy crawl echo_spider -O crawl_output.json
 
+      - name: Check crawl_output exists
+        id: check_output
+        run: |
+          if [ -f crawl_output.json ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload crawl_output artifact
+        if: steps.check_output.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: crawl_output
+          path: crawl_output.json
+
       - name: Pull latest before committing
         run: |
           git pull --rebase origin main || true
