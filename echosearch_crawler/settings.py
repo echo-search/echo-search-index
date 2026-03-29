@@ -24,7 +24,7 @@ AUTOTHROTTLE_MAX_DELAY = 10
 # ------------------------------------------------
 # PREVENT 6-HR GITHUB CANCELLATION
 # ------------------------------------------------
-CLOSESPIDER_PAGECOUNT = 100
+CLOSESPIDER_PAGECOUNT = 1000000000
 CLOSESPIDER_TIMEOUT = 6300
 
 # ------------------------------------------------
