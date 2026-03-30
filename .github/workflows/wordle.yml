@@ -3,33 +3,30 @@ name: Auto Generate index.html
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write   # 👈 this fixes the 403
+
 jobs:
   generate-html:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout with token
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create index.html (1 line)
+      # 2️⃣ Create index.html (one single line)
+      - name: Create index.html
         run: |
           echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Auto Generated Page</title></head><body><h1>Hello from GitHub Actions!</h1></body></html>" > index.html
 
-      - name: Configure Git
+      # 3️⃣ Commit + push
+      - name: Commit and Push index.html
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Stage index.html
-        run: |
-          git add index.html
-
-      - name: Commit index.html
-        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html || echo "No file to add"
           git commit -m "Auto-generate index.html via GitHub Actions" || echo "No changes to commit"
-
-      - name: Push changes
-        run: |
-          git push
+          git push origin HEAD:main
