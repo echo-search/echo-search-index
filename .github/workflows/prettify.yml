@@ -17,10 +17,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2️⃣ Rebuild index.html in neat multi-line form
-      - name: Generate index.html using printf
+      # 2️⃣ Convert 1-line HTML → neat multi-line HTML
+      - name: Rebuild index.html neatly
         run: |
-          printf "%s\n" $(sed 's/"/\\"/g; s/^/"/; s/$/ \\n"/' index.html | tr '\n' ' ') > index_new.html
+          sed 's/"/\\"/g; s/^/"/; s/$/"/' index.html > printf_lines.txt
+          printf "%b\n" $(cat printf_lines.txt) > index_new.html
           mv index_new.html index.html
 
       # 3️⃣ Commit + push
