@@ -34,8 +34,34 @@ jobs:
       - name: Select batch
         run: head -n 50 wet.paths > batch.txt
 
-      - name: Build index (ONE LINE)
-        run: python3 -c "import requests,gzip,json,os;BASE='https://data.commoncrawl.org/';docs=[];paths=[l.strip() for l in open('batch.txt')];parse=lambda u:(lambda r:(lambda txt:[({'url':b.split('WARC-Target-URI: ')[1].split('\n')[0],'title':(b.split('\n\n',1)[1].strip())[:80],'description':(b.split('\n\n',1)[1].strip())[:160],'snippet':(b.split('\n\n',1)[1].strip())[:200]}) for b in txt if 'WARC-Type: conversion' in b and 'WARC-Target-URI: ' in b and '\n\n' in b])(gzip.GzipFile(fileobj=r.raw).read().decode('utf-8','ignore').split('WARC/1.0')))(requests.get(u,stream=True,timeout=20));[docs.extend(parse(BASE+p)) for p in paths];os.makedirs('public',exist_ok=True);idx='public/index.json';existing=json.load(open(idx)) if os.path.exists(idx) else [];existing=(existing+docs)[-50000:];json.dump(existing,open(idx,'w'))"
+      - name: Build index (ONE LINE SAFE)
+        run: >
+          python3 -c "import requests,gzip,json,os;
+          BASE='https://data.commoncrawl.org/';
+          docs=[];
+          paths=[l.strip() for l in open('batch.txt')];
+          def parse(u):
+              out=[];
+              try:
+                  r=requests.get(u,stream=True,timeout=20);
+                  txt=gzip.GzipFile(fileobj=r.raw).read().decode('utf-8','ignore').split('WARC/1.0');
+                  for b in txt:
+                      if 'WARC-Type: conversion' in b and 'WARC-Target-URI: ' in b and '\n\n' in b:
+                          try:
+                              url=b.split('WARC-Target-URI: ')[1].split('\n')[0];
+                              t=b.split('\n\n',1)[1].strip();
+                              out.append({'url':url,'title':t[:80],'description':t[:160],'snippet':t[:200]});
+                          except:
+                              pass;
+              except:
+                  pass;
+              return out;
+          [docs.extend(parse(BASE+p)) for p in paths];
+          os.makedirs('public',exist_ok=True);
+          idx='public/index.json';
+          existing=json.load(open(idx)) if os.path.exists(idx) else [];
+          existing=(existing+docs)[-50000:];
+          json.dump(existing,open(idx,'w'))"
 
       - name: Commit index
         env:
@@ -45,7 +71,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add public/index.json
-
           git commit -m "update index" || echo "no changes"
 
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
