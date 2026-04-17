@@ -24,19 +24,26 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests
-
-      - name: Download WET paths
         run: |
-          wget https://data.commoncrawl.org/crawl-data/CC-MAIN-2026-12/wet.paths.gz
-          gunzip wet.paths.gz
+          pip install requests beautifulsoup4
 
+      # ✅ IMPORTANT: switch to WARC
+      - name: Download WARC paths
+        run: |
+          wget https://data.commoncrawl.org/crawl-data/CC-MAIN-2026-12/warc.paths.gz
+          gunzip warc.paths.gz
+
+      # ✅ Controlled batching
       - name: Select batch
-        run: split -l 1000 wet.paths batch_
+        run: |
+          split -l 500 warc.paths batch_
+          mv batch_aa batch.txt   # process ONE batch per run
 
+      # ✅ Run your upgraded parser
       - name: Run index builder
         run: python3 scripts/build_index.py
 
+      # ✅ Commit safely
       - name: Commit index
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,6 +52,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add public/index.json
-          git commit -m "update index" || echo "no changes"
 
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "update index"
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          finame: EchoSearch Index Builder
