@@ -32,7 +32,7 @@ jobs:
           gunzip wet.paths.gz
 
       - name: Select batch
-        run: head -n 50 wet.paths > batch.txt
+        run: split -l 1000 wet.paths batch_
 
       - name: Run index builder
         run: python3 scripts/build_index.py
