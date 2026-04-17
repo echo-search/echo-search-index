@@ -3,13 +3,34 @@ import gzip
 import json
 import os
 import glob
+from bs4 import BeautifulSoup
 
 BASE_URL = "https://data.commoncrawl.org/"
 OUTPUT_FILE = "public/index.json"
-MAX_DOCS = 100000  # be realistic or GitHub will cry
+MAX_DOCS = 100000
 
 
-def parse_wet_stream(url):
+def extract_html_fields(html):
+    soup = BeautifulSoup(html, "html.parser")
+
+    # title
+    title_tag = soup.find("title")
+    title = title_tag.get_text(strip=True) if title_tag else None
+
+    # meta description
+    desc_tag = soup.find("meta", attrs={"name": "description"})
+    if not desc_tag:
+        desc_tag = soup.find("meta", attrs={"property": "og:description"})
+
+    description = desc_tag["content"].strip() if desc_tag and desc_tag.get("content") else None
+
+    # fallback text
+    text = soup.get_text(separator=" ", strip=True)
+
+    return title, description, text
+
+
+def parse_warc_stream(url):
     try:
         response = requests.get(url, stream=True, timeout=30)
         response.raise_for_status()
@@ -17,23 +38,26 @@ def parse_wet_stream(url):
         gz = gzip.GzipFile(fileobj=response.raw)
 
         buffer = ""
+
         for chunk in gz:
             buffer += chunk.decode("utf-8", errors="ignore")
 
             while "WARC/1.0" in buffer:
                 part, buffer = buffer.split("WARC/1.0", 1)
 
-                if "WARC-Type: conversion" not in part:
+                if "Content-Type: text/html" not in part:
                     continue
 
                 try:
-                    url_line = part.split("WARC-Target-URI: ")[1].split("\n")[0]
-                    text = part.split("\n\n", 1)[1].strip()
+                    target_url = part.split("WARC-Target-URI: ")[1].split("\n")[0]
+                    html = part.split("\r\n\r\n", 1)[1]
+
+                    title, description, text = extract_html_fields(html)
 
                     yield {
-                        "url": url_line,
-                        "title": text[:80],
-                        "description": text[:160],
+                        "url": target_url,
+                        "title": title or text[:80],
+                        "description": description or text[:160],
                         "snippet": text[:200]
                     }
 
@@ -45,9 +69,7 @@ def parse_wet_stream(url):
 
 
 def get_batch_files():
-    # supports both split batches and single file
     files = sorted(glob.glob("batch_*"))
-
     if files:
         return files
     elif os.path.exists("batch.txt"):
@@ -59,7 +81,6 @@ def get_batch_files():
 def main():
     os.makedirs("public", exist_ok=True)
 
-    # load existing index safely
     if os.path.exists(OUTPUT_FILE):
         try:
             with open(OUTPUT_FILE) as f:
@@ -81,18 +102,16 @@ def main():
             full_url = BASE_URL + path
             print("Processing:", full_url)
 
-            for doc in parse_wet_stream(full_url):
+            for doc in parse_warc_stream(full_url):
                 combined.append(doc)
 
-                # keep size under control
                 if len(combined) > MAX_DOCS:
                     combined = combined[-MAX_DOCS:]
 
-    # write once at the end
     with open(OUTPUT_FILE, "w") as f:
         json.dump(combined, f)
 
-    print("Done. Total docs:", len(combined))
+    print("Done. Docs:", len(combined))
 
 
 if __name__ == "__main__":
