@@ -4,8 +4,13 @@ import itertools
 from pathlib import Path
 
 OUTPUT_FILE = "echosearch_suggestions.json"
+
+# TARGET
 TARGET_COUNT = 8_000_000_000
+
+# PERFORMANCE
 FLUSH_INTERVAL = 100_000
+BUFFER_SIZE = 1024 * 1024  # 1MB buffer
 
 topics = [
     "translate","meaning","basics","tutorial","guide","how to","examples",
@@ -108,54 +113,51 @@ modifiers = [
     "student friendly","teacher approved","family friendly"
 ]
 
-for i in range(1, 501):
+# MASSIVE EXPANSION
+for i in range(1, 5001):
+
     topics.extend([
         f"topic {i}",
         f"advanced topic {i}",
         f"modern topic {i}",
-        f"ultimate topic {i}"
+        f"ultimate topic {i}",
+        f"professional topic {i}"
     ])
 
     subjects.extend([
         f"subject {i}",
-        f"professional subject {i}",
+        f"advanced subject {i}",
         f"enterprise subject {i}",
+        f"professional subject {i}",
         f"beginner subject {i}"
     ])
 
     modifiers.extend([
         f"modifier {i}",
         f"advanced modifier {i}",
+        f"optimized modifier {i}",
         f"production modifier {i}",
-        f"optimized modifier {i}"
+        f"enterprise modifier {i}"
     ])
 
 patterns = [
     "{topic} {subject}",
     "{topic} {subject} {modifier}",
-    "{subject} {modifier}",
     "{subject} tutorial",
     "{subject} guide",
     "{subject} basics",
-    "{subject} meaning",
-    "{topic} for {subject}",
-    "{topic} and {subject}",
-    "{subject} explained",
     "{subject} examples",
+    "{subject} explained",
     "{subject} online",
     "{subject} free",
     "{subject} course",
-    "{subject} for beginners",
     "{subject} advanced guide",
+    "{subject} for beginners",
     "{subject} step by step",
     "{subject} crash course",
-    "{subject} deep dive",
     "{subject} quick start",
+    "{subject} deep dive",
     "{subject} cheatsheet",
-    "{subject} full tutorial",
-    "{subject} walkthrough",
-    "{subject} complete roadmap",
-    "{subject} real examples",
     "{subject} interview questions",
     "{subject} practice problems",
     "{subject} exam prep",
@@ -163,62 +165,95 @@ patterns = [
     "{subject} summary",
     "{subject} explained simply",
     "{subject} explained visually",
-    "{subject} production ready",
-    "{subject} project ideas",
-    "{subject} mini projects",
-    "{subject} latest updates",
-    "{subject} trending",
-    "{subject} community guide",
-    "{subject} industry standard",
-    "{subject} ai powered",
-    "{subject} with source code",
-    "{subject} with answers",
-    "{subject} with diagrams",
-    "{subject} with animations",
-    "{subject} in depth",
     "{subject} complete guide",
-    "{subject} professional tutorial",
+    "{subject} production ready",
     "{subject} beginner friendly",
     "{subject} advanced concepts",
-    "{subject} zero to hero"
+    "{subject} zero to hero",
+    "{subject} latest updates",
+    "{subject} trending",
+    "{subject} industry standard",
+    "{subject} with source code",
+    "{subject} project ideas",
+    "{subject} mini projects",
+    "{topic} and {subject}",
+    "{topic} for {subject}",
+    "{subject} roadmap",
+    "{subject} complete roadmap",
+    "{subject} ai powered",
+    "{subject} full tutorial",
+    "{subject} walkthrough",
+    "{subject} real examples",
+    "{subject} with answers",
+    "{subject} with diagrams",
+    "{subject} in depth"
 ]
 
-def normalize(text):
+def normalize(text: str) -> str:
     return " ".join(text.lower().strip().split())
 
-def hash_text(text):
+def hash_text(text: str) -> str:
     return hashlib.blake2b(
         text.encode("utf-8"),
         digest_size=16
     ).hexdigest()
 
 def suggestion_generator():
-    for pattern in itertools.cycle(patterns):
-        for topic in topics:
-            for subject in subjects:
-                for modifier in modifiers:
 
-                    suggestion = pattern.format(
-                        topic=topic,
-                        subject=subject,
-                        modifier=modifier
-                    )
+    for topic, subject, modifier, pattern in itertools.product(
+        topics,
+        subjects,
+        modifiers,
+        patterns
+    ):
 
-                    yield normalize(suggestion)
+        yield normalize(
+            pattern.format(
+                topic=topic,
+                subject=subject,
+                modifier=modifier
+            )
+        )
 
 def main():
-    print("Starting EchoSearch suggestion generation...")
 
-    seen_hashes = set()
-    generated = 0
-    first = True
+    print("======================================")
+    print(" EchoSearch Massive Suggestion Builder")
+    print("======================================\n")
+
+    print(f"Topics:     {len(topics):,}")
+    print(f"Subjects:   {len(subjects):,}")
+    print(f"Modifiers:  {len(modifiers):,}")
+    print(f"Patterns:   {len(patterns):,}")
+
+    total_possible = (
+        len(topics)
+        * len(subjects)
+        * len(modifiers)
+        * len(patterns)
+    )
+
+    print(f"\nTotal possible combinations: {total_possible:,}")
+    print(f"Target suggestions:          {TARGET_COUNT:,}\n")
 
     Path(OUTPUT_FILE).parent.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    generated = 0
+    first = True
+
+    # MEMORY SAFE
+    seen_hashes = set()
+    MAX_HASHES = 5_000_000
+
+    with open(
+        OUTPUT_FILE,
+        "w",
+        encoding="utf-8",
+        buffering=BUFFER_SIZE
+    ) as f:
 
         f.write("[\n")
 
@@ -230,6 +265,9 @@ def main():
                 continue
 
             seen_hashes.add(suggestion_hash)
+
+            if len(seen_hashes) >= MAX_HASHES:
+                seen_hashes.clear()
 
             if not first:
                 f.write(",\n")
@@ -244,15 +282,21 @@ def main():
             generated += 1
 
             if generated % FLUSH_INTERVAL == 0:
+
                 f.flush()
-                print(f"Generated: {generated:,}")
+
+                print(
+                    f"Generated: {generated:,} / {TARGET_COUNT:,}"
+                )
 
             if generated >= TARGET_COUNT:
                 break
 
         f.write("\n]")
 
-    print("\nGeneration complete.")
+    print("\n======================================")
+    print(" Generation Complete")
+    print("======================================")
     print(f"Saved to: {OUTPUT_FILE}")
     print(f"Total suggestions: {generated:,}")
 
