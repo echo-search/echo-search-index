@@ -25,7 +25,7 @@ topics = [
     "macos","android","iphone","startup","marketing","seo","social media",
     "content creation","youtube","tiktok","instagram","study tips",
     "exam prep","college","university","homework","productivity",
-    "time management","meditation","mental health","gardening","pets","dogs",
+    "time management","meditation","gardening","pets","dogs",
     "cats","memes","fun facts","life hacks","automation","robotics",
     "data science","statistics","algebra","geometry","trigonometry",
     "calculus","philosophy","psychology","astronomy","astrophysics",
@@ -81,21 +81,7 @@ subjects = [
     "spanish vocabulary","japanese hiragana","korean hangul",
     "chinese characters","anime streaming","manga websites",
     "gaming setup","minecraft builds","fortnite settings",
-    "roblox scripts","valorant aim","cs2 settings","streaming setup",
-    "podcast equipment","camera settings","photography lighting",
-    "drawing anatomy","digital art","ui ux design","wireframe design",
-    "figma tutorial","react tutorial","vue tutorial",
-    "angular tutorial","python automation","javascript basics",
-    "typescript guide","golang backend","rust performance","swift ui",
-    "kotlin app","docker containers","kubernetes cluster",
-    "cloud computing","aws tutorial","azure setup","google cloud",
-    "open source projects","echosearch","search engine development",
-    "browser rendering","api development","database design",
-    "sql tutorial","mongodb guide","postgresql setup",
-    "firebase auth","nodejs backend","express api",
-    "fastapi tutorial","graphql basics","computer vision",
-    "neural networks","prompt engineering","chatbots",
-    "virtual reality","augmented reality"
+    "roblox scripts","valorant aim","cs2 settings","streaming setup"
 ]
 
 modifiers = [
@@ -119,27 +105,30 @@ modifiers = [
     "zero to hero","minimal setup","fully automated","manual setup",
     "ai generated","human written","industry standard",
     "enterprise grade","professional quality","school friendly",
-    "student friendly","teacher approved","family friendly",
-    "kid friendly","safe","verified","trusted","ad free",
-    "high resolution","low resource usage","instant access","offline",
-    "cross platform","multi language","future proof",
-    "optimized for mobile","optimized for desktop",
-    "production quality","full project","real examples",
-    "sample projects","mini projects","with source code",
-    "with answers","with explanations","with diagrams",
-    "with animations","with exercises","with quizzes","with notes",
-    "with cheatsheet","high accuracy","low cost","budget friendly",
-    "premium","luxury","ultra fast","super simple","beginner guide",
-    "expert guide","developer edition","student edition",
-    "teacher edition","creator edition","pro edition",
-    "ultimate edition","complete roadmap","career focused",
-    "interview focused","exam focused","project based",
-    "challenge based","certification ready","portfolio ready",
-    "industry ready","fully responsive","fully scalable",
-    "fully documented","easy setup","instant results","power user",
-    "high demand","easy explained","fully explained","in depth",
-    "comprehensive"
+    "student friendly","teacher approved","family friendly"
 ]
+
+for i in range(1, 501):
+    topics.extend([
+        f"topic {i}",
+        f"advanced topic {i}",
+        f"modern topic {i}",
+        f"ultimate topic {i}"
+    ])
+
+    subjects.extend([
+        f"subject {i}",
+        f"professional subject {i}",
+        f"enterprise subject {i}",
+        f"beginner subject {i}"
+    ])
+
+    modifiers.extend([
+        f"modifier {i}",
+        f"advanced modifier {i}",
+        f"production modifier {i}",
+        f"optimized modifier {i}"
+    ])
 
 patterns = [
     "{topic} {subject}",
@@ -218,7 +207,7 @@ def suggestion_generator():
                     yield normalize(suggestion)
 
 def main():
-    print("Starting EchoSearch massive suggestion generation...")
+    print("Starting EchoSearch suggestion generation...")
 
     seen_hashes = set()
     generated = 0
@@ -256,10 +245,7 @@ def main():
 
             if generated % FLUSH_INTERVAL == 0:
                 f.flush()
-
-                print(
-                    f"Generated: {generated:,}"
-                )
+                print(f"Generated: {generated:,}")
 
             if generated >= TARGET_COUNT:
                 break
