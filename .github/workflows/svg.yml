@@ -1,42 +1,46 @@
-name: EchoSearch SVG Generator
+# .github/workflows/trace-svg.yml
+
+name: Trace PNG To SVG
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "favicon 9.png"
+
+permissions:
+  contents: write
 
 jobs:
-  generate:
+  trace:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
-      - name: Create output directory
-        run: mkdir -p output
+      - name: Install dependencies
+        run: |
+          pip install pillow numpy scikit-image
 
-      - name: Run generator
+      - name: Run tracer
         run: |
           python3 scripts/svg-code.py
 
-      - name: Commit and push generated file
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit SVG
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add output/echosearch_suggestions.json
+          git add echosearch_exact_trace.svg
 
-          git commit -m "Generate EchoSearch suggestions" || echo "No changes"
+          git diff --staged --quiet || git commit -m "Auto-update traced SVG"
 
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
