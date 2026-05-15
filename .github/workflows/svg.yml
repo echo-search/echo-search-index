@@ -1,4 +1,4 @@
-name: EchoSearch Suggestions Generator
+name: EchoSearch SVG Generator
 
 on:
   workflow_dispatch:
