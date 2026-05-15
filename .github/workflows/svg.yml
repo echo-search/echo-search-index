@@ -30,7 +30,7 @@ jobs:
 
       - name: Run tracer
         run: |
-          python3 scripts/svg-code.py
+          python3 svg-code.py
 
       - name: Commit SVG
         run: |
